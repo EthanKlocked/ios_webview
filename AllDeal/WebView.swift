@@ -73,16 +73,17 @@ class WebViewCoordinator: NSObject, WKNavigationDelegate, UIImagePickerControlle
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        // Check if the navigation action is a link click
-        if navigationAction.navigationType == .linkActivated {
-            if let url = navigationAction.request.url {
-                // Open links in an external browser or app
-                UIApplication.shared.open(url)
-                decisionHandler(.cancel)
-                return
-            }
+        if let url = navigationAction.request.url,
+        url.scheme != "http" && url.scheme != "https" {
+            UIApplication.shared.open(url, options: [:], completionHandler:{ (success) in
+                if !(success){
+                    /*앱이 설치되어 있지 않을 때*/
+                }
+            })
+            decisionHandler(.cancel)
+        } else {
+            decisionHandler(.allow)
         }
-        decisionHandler(.allow)
     }
     
     func checkCameraPermission(completion: @escaping (Bool) -> Void) {
